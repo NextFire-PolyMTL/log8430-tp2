@@ -211,28 +211,17 @@ public class PlaylistPagerFragment extends Fragment {
         protected String doInBackground(String... params) {
             if (getActivity() == null) return "null";
 
-            if (showAuto) {
-
-            } else return getPlaylistDetails();
-
-
-            if (getActivity() != null) {
-                if (showAuto) {
-                    switch (pageNumber) {
-                        case Constants.NAVIGATE_PLAYLIST_LASTADDED:
-                            return getLastAddedSongsDetails();
-                        case Constants.NAVIGATE_PLAYLIST_RECENT:
-                            return getRecentSongsDetails();
-                        case Constants.NAVIGATE_PLAYLIST_TOPTRACKS:
-
-                        default:
-                            return getPlaylistDetails();
-
-                    }
-                } else {
+            if (!showAuto) return getPlaylistDetails();
+            switch (pageNumber) {
+                case Constants.NAVIGATE_PLAYLIST_LASTADDED:
+                    return getLastAddedSongsDetails();
+                case Constants.NAVIGATE_PLAYLIST_RECENT:
+                    return getRecentSongsDetails();
+                case Constants.NAVIGATE_PLAYLIST_TOPTRACKS:
+                    return getTopTracksDetails();
+                default:
                     return getPlaylistDetails();
-                }
-            } else return "context is null";
+            }
         }
 
         @Override
