@@ -113,13 +113,6 @@ public class NowPlayingUIHandler {
     public void setSongDetails(View view) {
 
         albumart = (ImageView) view.findViewById(R.id.album_art);
-        shuffle = (ImageView) view.findViewById(R.id.shuffle);
-        repeat = (ImageView) view.findViewById(R.id.repeat);
-        next = (MaterialIconView) view.findViewById(R.id.next);
-        previous = (MaterialIconView) view.findViewById(R.id.previous);
-        mPlayPause = (PlayPauseButton) view.findViewById(R.id.playpause);
-        playPauseFloating = (FloatingActionButton) view.findViewById(R.id.playpausefloating);
-        playPauseWrapper = view.findViewById(R.id.playpausewrapper);
 
         songtitle = (TextView) view.findViewById(R.id.song_title);
         songalbum = (TextView) view.findViewById(R.id.song_album);
@@ -251,10 +244,10 @@ public class NowPlayingUIHandler {
         duetoplaypause = false;
 
         if (mPlayPause != null)
-            updatePlayPauseButton();
+            PlayPauseHandler.updatePlayPauseButton();
 
         if (playPauseFloating != null)
-            updatePlayPauseFloatingButton();
+            PlayPauseHandler.updatePlayPauseFloatingButton();
 
         if (songduration != null && getActivity() != null)
             songduration.setText(TimberUtils.makeShortTimeString(getActivity(), MusicPlayer.duration() / 1000));

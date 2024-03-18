@@ -59,7 +59,6 @@ import com.naman14.timber.utils.TimberUtils;
 import com.naman14.timber.widgets.CircularSeekBar;
 import com.naman14.timber.widgets.DividerItemDecoration;
 import com.naman14.timber.widgets.PlayPauseButton;
-import com.naman14.timber.widgets.PlayPauseDrawable;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
@@ -73,9 +72,6 @@ import java.security.InvalidParameterException;
 public class BaseNowplayingFragment extends Fragment implements MusicStateListener {
 
     private MaterialIconView previous, next;
-    private PlayPauseButton mPlayPause;
-    private PlayPauseDrawable playPauseDrawable = new PlayPauseDrawable();
-    private FloatingActionButton playPauseFloating;
     private View playPauseWrapper;
 
     private String ateKey;
@@ -83,59 +79,12 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
     private BaseQueueAdapter mAdapter;
     private SlidingQueueAdapter slidingQueueAdapter;
 
-    private TextView hourColon;
     private int[] timeArr = new int[]{0, 0, 0, 0, 0};
-    private Handler mElapsedTimeHandler;
     private boolean duetoplaypause = false;
 
-    public ImageView albumart, shuffle, repeat;
+    public ImageView shuffle, repeat;
     public int accentColor;
     public RecyclerView recyclerView;
-
-    private final View.OnClickListener mButtonListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            duetoplaypause = true;
-            if (!mPlayPause.isPlayed()) {
-                mPlayPause.setPlayed(true);
-                mPlayPause.startAnimation();
-            } else {
-                mPlayPause.setPlayed(false);
-                mPlayPause.startAnimation();
-            }
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    MusicPlayer.playOrPause();
-                    if (recyclerView != null && recyclerView.getAdapter() != null)
-                        recyclerView.getAdapter().notifyDataSetChanged();
-                }
-            }, 200);
-        }
-    };
-
-    private final View.OnClickListener mFLoatingButtonListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            duetoplaypause = true;
-            if(MusicPlayer.getCurrentTrack() == null) {
-                Toast.makeText(getContext(), getString(R.string.now_playing_no_track_selected), Toast.LENGTH_SHORT).show();
-            } else {
-                playPauseDrawable.transformToPlay(true);
-                playPauseDrawable.transformToPause(true);
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        MusicPlayer.playOrPause();
-                        if (recyclerView != null && recyclerView.getAdapter() != null)
-                            recyclerView.getAdapter().notifyDataSetChanged();
-                    }
-                }, 250);
-            }
-        }
-    };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -150,6 +99,8 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
         mPlayPause = (PlayPauseButton) view.findViewById(R.id.playpause);
         playPauseFloating = (FloatingActionButton) view.findViewById(R.id.playpausefloating);
         playPauseWrapper = view.findViewById(R.id.playpausewrapper);
+
+        playPauseHandler = new PlayPauseHandler(mPlayPause, playPauseWrapper, playPauseFloating, recyclerView);
     }
 
     @Override
@@ -247,8 +198,8 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
         if (playPauseWrapper != null)
             playPauseWrapper.setOnClickListener(mButtonListener);
 
-        if (playPauseFloating != null)
-            playPauseFloating.setOnClickListener(mFLoatingButtonListener);
+        if (PlayPauseHandler.playPauseFloating != null)
+            PlayPauseHandler.playPauseFloating.setOnClickListener(mFLoatingButtonListener);
 
         updateShuffleState();
         updateRepeatState();
@@ -316,28 +267,6 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
         if (getActivity() != null)
             new loadQueueSongs().execute("");
 
-    }
-
-    public void updatePlayPauseButton() {
-        if (MusicPlayer.isPlaying()) {
-            if (!mPlayPause.isPlayed()) {
-                mPlayPause.setPlayed(true);
-                mPlayPause.startAnimation();
-            }
-        } else {
-            if (mPlayPause.isPlayed()) {
-                mPlayPause.setPlayed(false);
-                mPlayPause.startAnimation();
-            }
-        }
-    }
-
-    public void updatePlayPauseFloatingButton() {
-        if (MusicPlayer.isPlaying()) {
-            playPauseDrawable.transformToPause(false);
-        } else {
-            playPauseDrawable.transformToPlay(false);
-        }
     }
 
     public void notifyPlayingDrawableChange() {
