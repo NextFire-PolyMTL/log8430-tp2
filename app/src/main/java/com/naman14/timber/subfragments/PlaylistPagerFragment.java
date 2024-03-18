@@ -154,69 +154,85 @@ public class PlaylistPagerFragment extends Fragment {
 
     private class loadPlaylistImage extends AsyncTask<String, Void, String> {
 
+        private int getPlaylistTotalRuntime(List<Song> playlist) {
+            int totalRuntime = 0;
+            for(Song song : playlist) {
+                totalRuntime += song.duration;
+            }
+            return totalRuntime;
+        }
+
+        private String getPlaylistDetails() {
+            List<Song> playlistsongs = PlaylistSongLoader.getSongsInPlaylist(getActivity(), playlist.id);
+
+            totalRuntime = getPlaylistTotalRuntime(playlistsongs);
+
+            if (playlistsongs.size() == 0) return "nosongs";
+
+            firstAlbumID = playlistsongs.get(0).albumId;
+            return TimberUtils.getAlbumArtUri(firstAlbumID).toString();
+        }
+
+        private String getLastAddedSongsDetails() {
+            List<Song> lastAddedSongs = LastAddedLoader.getLastAddedSongs(getActivity());
+            totalRuntime = getPlaylistTotalRuntime(lastAddedSongs) / 1000; // Default playlists' song durations are 1000x larger than the actual duration
+
+            if (lastAddedSongs.size() == 0) return "nosongs";
+
+            firstAlbumID = lastAddedSongs.get(0).albumId;
+            return TimberUtils.getAlbumArtUri(firstAlbumID).toString();
+        }
+
+        private String getRecentSongsDetails() {
+            TopTracksLoader recentloader = new TopTracksLoader(getActivity(), TopTracksLoader.QueryType.RecentSongs);
+            List<Song> recentsongs = SongLoader.getSongsForCursor(TopTracksLoader.getCursor());
+
+            totalRuntime = getPlaylistTotalRuntime(recentsongs) / 1000; // Default playlists' song durations are 1000x larger than the actual duration
+
+            if (recentsongs.size() == 0) return "nosongs";
+
+            firstAlbumID = recentsongs.get(0).albumId;
+            return TimberUtils.getAlbumArtUri(firstAlbumID).toString();
+        }
+
+        private String getTopTracksDetails() {
+            TopTracksLoader topTracksLoader = new TopTracksLoader(getActivity(), TopTracksLoader.QueryType.TopTracks);
+            List<Song> topsongs = SongLoader.getSongsForCursor(TopTracksLoader.getCursor());
+
+            totalRuntime = getPlaylistTotalRuntime(topsongs) / 1000; // Default playlists' song durations are 1000x larger than the actual duration
+
+            if (topsongs.size() == 0) return "nosongs";
+
+            firstAlbumID = topsongs.get(0).albumId;
+            return TimberUtils.getAlbumArtUri(firstAlbumID).toString();
+        }
+
         @Override
         protected String doInBackground(String... params) {
+            if (getActivity() == null) return "null";
+
+            if (showAuto) {
+
+            } else return getPlaylistDetails();
+
+
             if (getActivity() != null) {
                 if (showAuto) {
                     switch (pageNumber) {
-                        case 0:
-                            List<Song> lastAddedSongs = LastAddedLoader.getLastAddedSongs(getActivity());
-                            songCountInt = lastAddedSongs.size();
-                            for(Song song : lastAddedSongs) {
-                                totalRuntime += song.duration / 1000; //for some reason default playlists have songs with durations 1000x larger than they should be
-                            }
-                            if (songCountInt != 0) {
-                                firstAlbumID = lastAddedSongs.get(0).albumId;
-                                return TimberUtils.getAlbumArtUri(firstAlbumID).toString();
-                            } else return "nosongs";
-                        case 1:
-                            TopTracksLoader recentloader = new TopTracksLoader(getActivity(), TopTracksLoader.QueryType.RecentSongs);
-                            List<Song> recentsongs = SongLoader.getSongsForCursor(TopTracksLoader.getCursor());
-                            songCountInt = recentsongs.size();
-                            for(Song song : recentsongs){
-                                    totalRuntime += song.duration / 1000;
-                            }
+                        case Constants.NAVIGATE_PLAYLIST_LASTADDED:
+                            return getLastAddedSongsDetails();
+                        case Constants.NAVIGATE_PLAYLIST_RECENT:
+                            return getRecentSongsDetails();
+                        case Constants.NAVIGATE_PLAYLIST_TOPTRACKS:
 
-                            if (songCountInt != 0) {
-                                firstAlbumID = recentsongs.get(0).albumId;
-                                return TimberUtils.getAlbumArtUri(firstAlbumID).toString();
-                            } else return "nosongs";
-                        case 2:
-                            TopTracksLoader topTracksLoader = new TopTracksLoader(getActivity(), TopTracksLoader.QueryType.TopTracks);
-                            List<Song> topsongs = SongLoader.getSongsForCursor(TopTracksLoader.getCursor());
-                            songCountInt = topsongs.size();
-                            for(Song song : topsongs){
-                                    totalRuntime += song.duration / 1000;
-                            }
-                            if (songCountInt != 0) {
-                                firstAlbumID = topsongs.get(0).albumId;
-                                return TimberUtils.getAlbumArtUri(firstAlbumID).toString();
-                            } else return "nosongs";
                         default:
-                            List<Song> playlistsongs = PlaylistSongLoader.getSongsInPlaylist(getActivity(), playlist.id);
-                            songCountInt = playlistsongs.size();
-                            for(Song song : playlistsongs){
-                                totalRuntime += song.duration;
-                            }
-                            if (songCountInt != 0) {
-                                firstAlbumID = playlistsongs.get(0).albumId;
-                                return TimberUtils.getAlbumArtUri(firstAlbumID).toString();
-                            } else return "nosongs";
+                            return getPlaylistDetails();
 
                     }
                 } else {
-                    List<Song> playlistsongs = PlaylistSongLoader.getSongsInPlaylist(getActivity(), playlist.id);
-                    songCountInt = playlistsongs.size();
-                    for(Song song : playlistsongs){
-                        totalRuntime += song.duration;
-                    }
-                    if (songCountInt != 0) {
-                        firstAlbumID = playlistsongs.get(0).albumId;
-                        return TimberUtils.getAlbumArtUri(firstAlbumID).toString();
-                    } else return "nosongs";
+                    return getPlaylistDetails();
                 }
             } else return "context is null";
-
         }
 
         @Override
@@ -241,4 +257,3 @@ public class PlaylistPagerFragment extends Fragment {
 
 
 }
-
