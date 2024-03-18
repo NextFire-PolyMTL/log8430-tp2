@@ -29,46 +29,41 @@ public class WebServer extends NanoHTTPD {
                           Map<String, String> header,
                           Map<String, String> parameters,
                           Map<String, String> files) {
+        String Id = parameters.get("id");
         if (uri.contains("albumart")) {
-            //serve the picture
-
-            String albumId = parameters.get("id");
-            this.albumArtUri = TimberUtils.getAlbumArtUri(Long.parseLong(albumId));
-
-            if (albumArtUri != null) {
-                String mediasend = "image/jpg";
-                InputStream fisAlbumArt = null;
-                try {
-                    fisAlbumArt = context.getContentResolver().openInputStream(albumArtUri);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                Response.Status st = Response.Status.OK;
-
-                //serve the song
-                return newChunkedResponse(st, mediasend, fisAlbumArt);
-            }
-
+            serveImg(Id);
         } else if (uri.contains("song")) {
-
-            String songId = parameters.get("id");
-            this.songUri = TimberUtils.getSongUri(context, Long.parseLong(songId));
-
-            if (songUri != null) {
-                String mediasend = "audio/mp3";
-                FileInputStream fisSong = null;
-                File song = new File(songUri.getPath());
-                try {
-                    fisSong = new FileInputStream(song);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                Response.Status st = Response.Status.OK;
-
-                //serve the song
-                return newFixedLengthResponse(st, mediasend, fisSong, song.length());
+            serveSong(Id);
+        }
+        return newFixedLengthResponse("Error");
+    }
+    protected Response serveSong(String songId){
+        this.songUri = TimberUtils.getSongUri(context, Long.parseLong(songId));
+        if (songUri != null) {
+            FileInputStream fisSong = null;
+            File song = new File(songUri.getPath());
+            try {
+                fisSong = new FileInputStream(song);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
             }
+            //serve the song
+            return newFixedLengthResponse(Response.Status.OK, "audio/mp3", fisSong, song.length());
+        }
+        return newFixedLengthResponse("Error");
+    }
 
+    protected Response serveImg(String albumId){
+        this.albumArtUri = TimberUtils.getAlbumArtUri(Long.parseLong(albumId));
+        if (albumArtUri != null) {
+            InputStream fisAlbumArt = null;
+            try {
+                fisAlbumArt = context.getContentResolver().openInputStream(albumArtUri);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            //serve the song
+            return newChunkedResponse(Response.Status.OK, "image/jpg", fisAlbumArt);
         }
         return newFixedLengthResponse("Error");
     }
