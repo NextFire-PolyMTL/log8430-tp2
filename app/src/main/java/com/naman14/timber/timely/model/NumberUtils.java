@@ -87,31 +87,10 @@ public class NumberUtils {
     };
 
     public static float[][] getControlPointsFor(int start) {
-        switch (start) {
-            case (-1):
-                return graphNumber[-1];
-            case 0:
-                return graphNumber[0];
-            case 1:
-                return graphNumber[1];
-            case 2:
-                return graphNumber[2];
-            case 3:
-                return graphNumber[3];
-            case 4:
-                return graphNumber[4];
-            case 5:
-                return graphNumber[5];
-            case 6:
-                return graphNumber[6];
-            case 7:
-                return graphNumber[7];
-            case 8:
-                return graphNumber[8];
-            case 9:
-                return graphNumber[9];
-            default:
-                throw new InvalidParameterException("Unsupported number requested");
+        if (start < -1 || start > 9) {
+            throw new InvalidParameterException("Unsupported number requested");
         }
+        start = (start == -1) ? 10 : start;
+        return graphNumber[start];
     }
 }
