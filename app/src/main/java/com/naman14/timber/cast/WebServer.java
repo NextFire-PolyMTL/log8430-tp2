@@ -31,41 +31,42 @@ public class WebServer extends NanoHTTPD {
                           Map<String, String> files) {
         String Id = parameters.get("id");
         if (uri.contains("albumart")) {
-            serveImg(Id);
+            return serveImg(Id);
         } else if (uri.contains("song")) {
-            serveSong(Id);
+            return serveSong(Id);
         }
         return newFixedLengthResponse("Error");
     }
+
     protected Response serveSong(String songId){
         this.songUri = TimberUtils.getSongUri(context, Long.parseLong(songId));
-        if (songUri != null) {
-            FileInputStream fisSong = null;
-            File song = new File(songUri.getPath());
-            try {
-                fisSong = new FileInputStream(song);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            //serve the song
-            return newFixedLengthResponse(Response.Status.OK, "audio/mp3", fisSong, song.length());
+        if (songUri == null) {
+            return newFixedLengthResponse("Error");
         }
-        return newFixedLengthResponse("Error");
+        FileInputStream fisSong = null;
+        File song = new File(songUri.getPath());
+        try {
+            fisSong = new FileInputStream(song);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        //serve the song
+        return newFixedLengthResponse(Response.Status.OK, "audio/mp3", fisSong, song.length());
     }
 
     protected Response serveImg(String albumId){
         this.albumArtUri = TimberUtils.getAlbumArtUri(Long.parseLong(albumId));
         if (albumArtUri != null) {
-            InputStream fisAlbumArt = null;
-            try {
-                fisAlbumArt = context.getContentResolver().openInputStream(albumArtUri);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            //serve the song
-            return newChunkedResponse(Response.Status.OK, "image/jpg", fisAlbumArt);
+            return newFixedLengthResponse("Error");
         }
-        return newFixedLengthResponse("Error");
+        InputStream fisAlbumArt = null;
+        try {
+            fisAlbumArt = context.getContentResolver().openInputStream(albumArtUri);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        //serve the song
+        return newChunkedResponse(Response.Status.OK, "image/jpg", fisAlbumArt);
     }
 
 }
