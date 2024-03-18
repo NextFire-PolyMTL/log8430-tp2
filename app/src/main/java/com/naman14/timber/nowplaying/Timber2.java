@@ -33,7 +33,7 @@ import com.naman14.timber.utils.ImageUtils;
 
 import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
 
-public class Timber2 extends BaseNowplayingFragment {
+public class Timber2 extends BaseNowplayingFragmentEvenMode {
 
     ImageView mBlurredArt;
 
@@ -49,68 +49,6 @@ public class Timber2 extends BaseNowplayingFragment {
         initGestures(mBlurredArt);
 
         return rootView;
-    }
-
-    @Override
-    public void updateShuffleState() {
-        if (shuffle != null && getActivity() != null) {
-            MaterialDrawableBuilder builder = MaterialDrawableBuilder.with(getActivity())
-                    .setIcon(MaterialDrawableBuilder.IconValue.SHUFFLE)
-                    .setSizeDp(30);
-
-            if (MusicPlayer.getShuffleMode() == 0) {
-                builder.setColor(Color.WHITE);
-            } else builder.setColor(accentColor);
-
-            shuffle.setImageDrawable(builder.build());
-            shuffle.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    MusicPlayer.cycleShuffle();
-                    updateShuffleState();
-                    updateRepeatState();
-                }
-            });
-        }
-    }
-
-    @Override
-    public void updateRepeatState() {
-        if (repeat != null && getActivity() != null) {
-            MaterialDrawableBuilder builder = MaterialDrawableBuilder.with(getActivity())
-                    .setSizeDp(30);
-
-            if (MusicPlayer.getRepeatMode() == 0) {
-                builder.setColor(Color.WHITE);
-            } else builder.setColor(accentColor);
-
-            if (MusicPlayer.getRepeatMode() == MusicService.REPEAT_NONE) {
-                builder.setIcon(MaterialDrawableBuilder.IconValue.REPEAT);
-                builder.setColor(Color.WHITE);
-            } else if (MusicPlayer.getRepeatMode() == MusicService.REPEAT_CURRENT) {
-                builder.setIcon(MaterialDrawableBuilder.IconValue.REPEAT_ONCE);
-                builder.setColor(accentColor);
-            } else if (MusicPlayer.getRepeatMode() == MusicService.REPEAT_ALL) {
-                builder.setColor(accentColor);
-                builder.setIcon(MaterialDrawableBuilder.IconValue.REPEAT);
-            }
-
-            repeat.setImageDrawable(builder.build());
-            repeat.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    MusicPlayer.cycleRepeat();
-                    updateRepeatState();
-                    updateShuffleState();
-                }
-            });
-        }
-    }
-
-    @Override
-    public void doAlbumArtStuff(Bitmap loadedImage) {
-        setBlurredAlbumArt blurredAlbumArt = new setBlurredAlbumArt();
-        blurredAlbumArt.execute(loadedImage);
     }
 
     private class setBlurredAlbumArt extends AsyncTask<Bitmap, Void, Drawable> {
